@@ -2,12 +2,14 @@ package com.coeuy.osp.rmq.adepts.common;
 
 import com.coeuy.osp.rmq.adepts.builder.MessageQueueBuilder;
 import com.coeuy.osp.rmq.adepts.consumer.MessageProcess;
+import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.concurrent.ExecutorService;
 
 /**
  * <p> 初始化监听 </p>
@@ -16,10 +18,10 @@ import javax.annotation.Resource;
  */
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class InitListener {
 
-    @Resource
-    private MessageQueueBuilder messageBrokerBuilder;
+    private final MessageQueueBuilder messageBrokerBuilder;
 
     /**
      * 初始化监听
@@ -37,18 +39,31 @@ public class InitListener {
     @SneakyThrows
     public <T> void init(String exchange, String type, String queue, String routingKey, int threadCount, int intervalMils, boolean delayed, MessageProcess<T> messageProcess) {
         // 开启监听
-        ThreadPoolConsumer<T> threadPoolConsumer = new ThreadPoolConsumer.ThreadPoolConsumerBuilder<T>()
-                .setThreadCount(threadCount).setIntervalMils(intervalMils)
-                .setExchange(exchange).setRoutingKey(routingKey).setQueue(queue).setType(type).setDelayed(delayed)
-                .setMessageBrokerBuilder(messageBrokerBuilder).setMessageProcess(messageProcess)
-                .build();
-        threadPoolConsumer.start();
+        ThreadPoolConsumerBuilder<T> process = new ThreadPoolConsumerBuilder<T>()
+                .setThreadCount(threadCount)
+                .setIntervalMils(intervalMils)
+                .setExchange(exchange)
+                .setRoutingKey(routingKey)
+                .setQueue(queue)
+                .setType(type)
+                .setDelayed(delayed)
+                .setMessageBrokerBuilder(messageBrokerBuilder)
+                .setMessageProcess(messageProcess);
+        ThreadPoolConsumer<T> build = process.build();
+        System.out.println("构建消费线程池"+build.toString());
+        build.start();
     }
 
     @SneakyThrows
     public <T> void init(String exchange, String queue, String routingKey, MessageProcess<T> messageProcess, int threadCount) {
         // 使用 [默认线程参数]
         init(exchange, Constants.DEFAULT_EXCHANGE_TYPE, queue, routingKey, threadCount, Constants.DEFAULT_INTERVAL_MILS, false, messageProcess);
+    }
+
+    @SneakyThrows
+    public <T> void init(String queue, MessageProcess<T> messageProcess, int threadCount,int interval) {
+        // 使用 [默认线程参数]
+        init(Constants.DEFAULT_EXCHANGE_NAME, Constants.DEFAULT_EXCHANGE_TYPE, queue, Constants.DEFAULT_EXCHANGE_NAME+queue, threadCount,interval, false, messageProcess);
     }
 
     @SneakyThrows

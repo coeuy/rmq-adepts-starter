@@ -1,5 +1,7 @@
 package com.coeuy.osp.rmq.adepts.config;
 
+import lombok.NonNull;
+
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -35,7 +37,7 @@ public class RabbitThreadFactory implements ThreadFactory {
     }
 
     @Override
-    public Thread newThread(final Runnable runnable) {
+    public Thread newThread(final @NonNull Runnable runnable) {
         Thread thread = new Thread(THREAD_GROUP, runnable,
                 THREAD_GROUP.getName() + "-" + namePrefix + "-" + THREAD_NUMBER.getAndIncrement()
         );

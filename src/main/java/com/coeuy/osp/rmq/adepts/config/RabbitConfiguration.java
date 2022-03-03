@@ -68,7 +68,7 @@ public class RabbitConfiguration {
         rabbitTemplate.setMessageConverter(jackson2JsonMessageConverter());
         // 走完整个流程 防止消息丢失
         rabbitTemplate.setMandatory(true);
-        // 设置回调消息
+        // 设置发送确认
         rabbitTemplate.setConfirmCallback((correlationData, ack, cause) -> {
             assert correlationData != null;
             if (ack) {
@@ -114,8 +114,9 @@ public class RabbitConfiguration {
         connectionFactory.setPassword(rabbitProperties.getPassword());
         connectionFactory.setVirtualHost(rabbitProperties.getVirtualHost());
         connectionFactory.setPublisherReturns(true);
-        connectionFactory.setCacheMode(CachingConnectionFactory.CacheMode.CHANNEL);
-        connectionFactory.setChannelCacheSize(100);
+        connectionFactory.setCacheMode(CachingConnectionFactory.CacheMode.CONNECTION);
+        connectionFactory.setChannelCacheSize(200);
+        connectionFactory.setConnectionLimit(200);
         return connectionFactory;
     }
 }

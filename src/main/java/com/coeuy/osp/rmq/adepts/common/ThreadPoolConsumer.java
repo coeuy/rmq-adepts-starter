@@ -1,85 +1,90 @@
 package com.coeuy.osp.rmq.adepts.common;
 
 import com.coeuy.osp.rmq.adepts.builder.MessageConsumer;
-import com.coeuy.osp.rmq.adepts.builder.MessageQueueBuilder;
 import com.coeuy.osp.rmq.adepts.config.RabbitThreadFactory;
-import com.coeuy.osp.rmq.adepts.consumer.MessageProcess;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
 
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 /**
  * @author Yarnk
  */
 @Slf4j
 public class ThreadPoolConsumer<T> {
+
+
     private final ExecutorService executor;
+
     private final ThreadPoolConsumerBuilder<T> infoHolder;
+
     private boolean stop = false;
 
-    private ThreadPoolConsumer(ThreadPoolConsumerBuilder<T> threadPoolConsumerBuilder) {
+    public ThreadPoolConsumer(ThreadPoolConsumerBuilder<T> threadPoolConsumerBuilder) {
+        ThreadFactory threadFactory = RabbitThreadFactory.create("rmq-adepts-consumer-executor", true);
         this.infoHolder = threadPoolConsumerBuilder;
-        executor = new ThreadPoolExecutor(threadPoolConsumerBuilder.threadCount,
-                threadPoolConsumerBuilder.threadCount, 0,
-                TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(15),
-                RabbitThreadFactory.create("rmq-consumer-executor", false),
-                new ThreadPoolExecutor.AbortPolicy()
-        );
+        this.executor = new ThreadPoolExecutor(
+                threadPoolConsumerBuilder.getThreadCount(),
+                threadPoolConsumerBuilder.getThreadCount() + 10,
+                1000,
+                TimeUnit.MILLISECONDS,
+                new LinkedBlockingQueue<Runnable>(10),
+                threadFactory,
+                new ThreadPoolExecutor.AbortPolicy());
     }
+
 
     /**
      * 运行监听
      */
     public void start() {
-        log.info("开始执行监听 线程数[{}] 队列[{}] ", infoHolder.threadCount, infoHolder.queue);
-        for (int i = 0;
-             i < infoHolder.threadCount;
-             i++) {
-            // 构造messageConsumer
-            final MessageConsumer messageConsumer = infoHolder.messageBrokerBuilder.buildMessageConsumer(
-                    infoHolder.exchange,
-                    infoHolder.queue,
-                    infoHolder.type,
-                    Constants.DEFAULT_DEAD_LETTER_EXCHANGE,
-                    infoHolder.routingKey,
-                    infoHolder.delayed,
-                    infoHolder.messageProcess
-            );
-            executor.execute(() -> {
-                while (!stop) {
-                    try {
-                        // 执行consume 消费
-                        MessageResult messageResult = messageConsumer.consume();
-                        if (infoHolder.intervalMils > 0) {
-                            try {
-                                Thread.sleep(infoHolder.intervalMils);
-                            } catch (InterruptedException e) {
-                                e.printStackTrace();
-                                log.error("interrupt ", e);
+        // 构造messageConsumer
+        log.info("开始执行监听 线程数[{}] 队列[{}] ", infoHolder.getThreadCount(), infoHolder.getQueue());
+        for (int i = 0; i < infoHolder.getThreadCount(); i++) {
+            log.info("开始执行第{}条线程", i + 1);
+            try{
+                this.executor.execute(() -> {
+                    MessageConsumer messageConsumer = infoHolder.getMessageBrokerBuilder().buildMessageConsumer(
+                            infoHolder.getExchange(),
+                            infoHolder.getQueue(),
+                            infoHolder.getType(),
+                            Constants.DEFAULT_DEAD_LETTER_EXCHANGE,
+                            infoHolder.getRoutingKey(),
+                            infoHolder.isDelayed(),
+                            infoHolder.getMessageProcess()
+                    );
+                    while (!stop) {
+                        try {
+                            // 执行consume 消费
+                            final MessageResult messageResult = messageConsumer.consume();
+                            if (infoHolder.getIntervalMils() > 0) {
+                                try {
+                                    Thread.sleep(infoHolder.getIntervalMils());
+                                } catch (InterruptedException e) {
+                                    e.printStackTrace();
+                                    log.error("interrupt ", e);
+                                }
                             }
+                            if (messageResult == null) {
+                                log.warn("消息处理确认为空");
+                                break;
+                            }
+                            if (!messageResult.isSuccess()) {
+                                log.warn("消费失败: 回执消息[{}] ", messageResult.getMessage());
+                            }
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            log.error("消费异常： ", e);
                         }
-                        if (messageResult == null) {
-
-                            break;
-                        } else if (!messageResult.isSuccess()) {
-                            log.warn("消费失败： Msg[{}] ", messageResult.getMessage());
-                        } else {
-                            log.info("消费成功：Msg [{}]", messageResult.getMessage());
-                        }
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        log.error("消费异常： ", e);
                     }
-                }
+                });
+            }catch (Exception e){
+                log.info("调度任务执行失败",e);
+                shutdown();
+            }
 
-            });
-            shutdown();
         }
-        Runtime.getRuntime()
-                .addShutdownHook(new Thread(this::stop));
+        Runtime.getRuntime().addShutdownHook(new Thread(this::stop));
     }
 
     public void stop() {
@@ -95,76 +100,19 @@ public class ThreadPoolConsumer<T> {
 
     private void shutdown() {
         if (!executor.isShutdown()) {
+            log.info("消费任务线程关闭");
             executor.shutdown();
         }
 
     }
 
-    /**
-     * 构造器
-     *
-     * @param <T>
-     */
-    public static class ThreadPoolConsumerBuilder<T> {
-        int threadCount;
-        long intervalMils;
-        boolean delayed;
-        MessageQueueBuilder messageBrokerBuilder;
-        String exchange;
-        String routingKey;
-        String queue;
-        String type;
-        MessageProcess<T> messageProcess;
-
-        public ThreadPoolConsumerBuilder<T> setThreadCount(int threadCount) {
-            this.threadCount = threadCount;
-            return this;
-        }
-
-        public ThreadPoolConsumerBuilder<T> setIntervalMils(long intervalMils) {
-            this.intervalMils = intervalMils;
-            return this;
-        }
-
-        public ThreadPoolConsumerBuilder<T> setDelayed(boolean delayed) {
-            this.delayed = delayed;
-            return this;
-        }
-
-        public ThreadPoolConsumerBuilder<T> setMessageBrokerBuilder(MessageQueueBuilder messageBrokerBuilder) {
-            this.messageBrokerBuilder = messageBrokerBuilder;
-            return this;
-        }
-
-        public ThreadPoolConsumerBuilder<T> setExchange(String exchange) {
-            this.exchange = exchange;
-
-            return this;
-        }
-
-        public ThreadPoolConsumerBuilder<T> setRoutingKey(String routingKey) {
-            this.routingKey = routingKey;
-
-            return this;
-        }
-
-        public ThreadPoolConsumerBuilder<T> setQueue(String queue) {
-            this.queue = queue;
-            return this;
-        }
-
-        public ThreadPoolConsumerBuilder<T> setType(String type) {
-            this.type = type;
-            return this;
-        }
-
-        public ThreadPoolConsumerBuilder<T> setMessageProcess(MessageProcess<T> messageProcess) {
-            this.messageProcess = messageProcess;
-            return this;
-        }
-
-        public ThreadPoolConsumer<T> build() {
-            return new ThreadPoolConsumer<>(this);
-        }
+    @Override
+    public String toString() {
+        return "ThreadPoolConsumer{" +
+                "executor=" + executor +
+                ", infoHolder=" + infoHolder +
+                ", stop=" + stop +
+                '}';
     }
+
 }

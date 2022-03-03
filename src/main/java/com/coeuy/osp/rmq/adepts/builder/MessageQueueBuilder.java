@@ -19,6 +19,7 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.rabbit.support.DefaultMessagePropertiesConverter;
 import org.springframework.amqp.rabbit.support.MessagePropertiesConverter;
 import org.springframework.amqp.support.converter.MessageConverter;
+import org.springframework.context.support.AbstractApplicationContext;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -145,6 +146,7 @@ public class MessageQueueBuilder {
      * @return {<Message>MessageConsumer}
      */
     public <T> MessageConsumer buildMessageConsumer(final String exchange, final String queue, final String exchangeType, final String toExchange, final String routingKey, boolean delayed, final MessageProcess<T> messageProcess) {
+        log.info("\nbuildMessageConsumer");
         final Connection connection = connectionFactory.createConnection();
         String queueName;
         if (delayed) {
@@ -163,12 +165,10 @@ public class MessageQueueBuilder {
         //2 设置message序列化方法
         final MessagePropertiesConverter messagePropertiesConverter = new DefaultMessagePropertiesConverter();
         return new MessageConsumer() {
-            Channel channel;
-
+            final Channel channel;
             {
                 channel = connection.createChannel(false);
             }
-
             @Override
             public MessageResult consume() {
                 try {
@@ -212,23 +212,6 @@ public class MessageQueueBuilder {
                                 .getDeliveryTag(), false, true);
                     }
                     return messageResult;
-                } catch (IllegalStateException e) {
-                    log.error("运行状态异常 ：{}", e.getMessage());
-                    return null;
-                } catch (InterruptedException e) {
-                    log.error("InterruptedException:\n", e);
-                    return new MessageResult(false, "中断异常\n" + e.toString());
-                } catch (ShutdownSignalException | ConsumerCancelledException | IOException e) {
-                    log.error("程序已关闭关闭 :\n", e);
-                    try {
-                        channel.close();
-                    } catch (IOException | TimeoutException ex) {
-                        log.error("exception:\n", ex);
-                    }
-                    channel = connection.createChannel(false);
-                    return new MessageResult(false, "关闭或取消异常\n" + e.toString());
-                } catch (AmqpApplicationContextClosedException | RejectedExecutionException e) {
-                    return null;
                 } catch (Exception e) {
                     e.printStackTrace();
                     log.info("消费异常 Exception:\n ", e);
@@ -236,9 +219,9 @@ public class MessageQueueBuilder {
                         channel.close();
                     } catch (IOException | TimeoutException ex) {
                         ex.printStackTrace();
-                        return new MessageResult(false, "关闭或取消异常\n" + e.toString());
+                        return new MessageResult(false, "关闭或取消异常\n" + e);
                     }
-                    return new MessageResult(false, "exception:\n" + e.toString());
+                    return new MessageResult(false, "exception:\n" + e);
                 }
             }
         };
