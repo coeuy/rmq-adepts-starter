@@ -1,31 +1,33 @@
-package com.coeuy.official.common.mq.producer;
+package com.coeuy.osp.rmq.adepts.producer;
 
-import com.coeuy.official.common.mq.builder.MessageQueueBuilder;
-import com.coeuy.official.common.mq.builder.MessageSender;
-import com.coeuy.official.common.mq.common.Constants;
-import com.coeuy.official.common.mq.common.MessageResult;
+import com.coeuy.osp.rmq.adepts.common.Constants;
+import com.coeuy.osp.rmq.adepts.common.MessageResult;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
+
+import javax.annotation.Resource;
 
 /**
  * @author Yarnk
+ * @date 2020/6/23 11:10
  */
 @Slf4j
-public class MessageProducer {
+@Component
+public class SimpleSender {
 
-    private final MessageQueueBuilder messageAccessBuilder;
+    private static MessageProducer messageProducer;
 
-    public MessageProducer(MessageQueueBuilder messageAccessBuilder) {
-        this.messageAccessBuilder = messageAccessBuilder;
+    @Resource
+    public void setMessageProducer(MessageProducer messageProducer) {
+        SimpleSender.messageProducer = messageProducer;
     }
 
-    public MessageResult sendMessage(String exchange, String queue, String type, String deadExchange, String routingKey, Object message) {
-        MessageSender messageSender = messageAccessBuilder.buildMessageSender(exchange, queue, type, deadExchange, routingKey);
-        return messageSender.send(message);
+    public static MessageResult sendMessage(String exchange, String queue, String type, String deadExchange, String routingKey, Object message) {
+        return messageProducer.sendMessage(exchange, queue, type, deadExchange, routingKey, message);
     }
 
-    public MessageResult sendDelayMessage(String exchange, String queue, String type, String deadExchange, String routingKey, Object message, final int millisecond) {
-        MessageSender messageSender = messageAccessBuilder.buildMessageSender(exchange, queue, type, deadExchange, routingKey);
-        return messageSender.sendDelayMessage(message, millisecond);
+    public static MessageResult sendDelayMessage(String exchange, String queue, String type, String deadExchange, String routingKey, Object message, final int millisecond) {
+        return messageProducer.sendDelayMessage(exchange, queue, type, deadExchange, routingKey, message, millisecond);
     }
 
     /**
@@ -35,7 +37,7 @@ public class MessageProducer {
      * @param message 消息
      * @return 发送执行结果
      */
-    public MessageResult sendMessage(String queue, Object message) {
+    public static MessageResult sendMessage(String queue, Object message) {
         // 使用默认路由
         String exchange = Constants.DEFAULT_EXCHANGE_NAME;
         // 使用默认路由类型
@@ -44,7 +46,7 @@ public class MessageProducer {
         String deadExchange = Constants.DEFAULT_DEAD_LETTER_EXCHANGE;
         // 默认标识组成
 
-        return sendMessage(exchange, queue, type, deadExchange, queue, message);
+        return sendMessage(exchange, queue, type, deadExchange, exchange + queue, message);
     }
 
     /**
@@ -55,7 +57,7 @@ public class MessageProducer {
      * @param message  消息
      * @return 发送执行结果
      */
-    public MessageResult sendMessage(String exchange, String queue, Object message) {
+    public static MessageResult sendMessage(String exchange, String queue, Object message) {
         // 使用默认路由类型
         String type = Constants.DEFAULT_EXCHANGE_TYPE;
         // 默认死信路由
@@ -73,7 +75,7 @@ public class MessageProducer {
      * @param message  消息
      * @return 发送执行结果
      */
-    public MessageResult sendMessage(String exchange, String queue, String routingKey, Object message) {
+    public static MessageResult sendMessage(String exchange, String queue, String routingKey, Object message) {
         // 使用默认路由类型
         String type = Constants.DEFAULT_EXCHANGE_TYPE;
         // 默认死信路由
@@ -89,7 +91,7 @@ public class MessageProducer {
      * @param message 消息
      * @return 发送执行结果
      */
-    public MessageResult sendMessageWithExchangeType(String queue, String type, Object message) {
+    public static MessageResult sendMessageWithExchangeType(String queue, String type, Object message) {
         // 使用默认路由
         String exchange = Constants.DEFAULT_EXCHANGE_NAME;
         // 默认死信路由
@@ -106,7 +108,7 @@ public class MessageProducer {
      * @param message  消息
      * @return 发送执行结果
      */
-    public MessageResult sendMessageWithExchangeType(String exchange, String queue, String type, Object message) {
+    public static MessageResult sendMessageWithExchangeType(String exchange, String queue, String type, Object message) {
         // 默认死信路由
         String deadExchange = Constants.DEFAULT_DEAD_LETTER_EXCHANGE;
         // 默认标识组成
@@ -123,7 +125,7 @@ public class MessageProducer {
      * @param message  消息
      * @return 发送执行结果
      */
-    public MessageResult sendDelayMessage(String exchange, String queue, Object message, final int millisecond) {
+    public static MessageResult sendDelayMessage(String exchange, String queue, Object message, final int millisecond) {
         // 使用默认路由类型
         String type = Constants.DEFAULT_EXCHANGE_TYPE;
         // 默认死信路由
@@ -141,9 +143,9 @@ public class MessageProducer {
      * @param millisecond 延时 毫秒
      * @return 发送执行结果
      */
-    public MessageResult sendDelayMessage(String queue, Object message, final int millisecond) {
+    public static MessageResult sendDelayMessage(String queue, Object message, final int millisecond) {
         // 使用默认路由
-        String exchange = Constants.DEFAULT_EXCHANGE_NAME;
+        String exchange = Constants.DEFAULT_DELAY_EXCHANGE_NAME;
         return sendDelayMessage(exchange, queue, message, millisecond);
     }
 

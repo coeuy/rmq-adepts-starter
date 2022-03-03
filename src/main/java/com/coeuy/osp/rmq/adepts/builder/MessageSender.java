@@ -1,7 +1,7 @@
-package com.coeuy.official.common.mq.builder;
+package com.coeuy.osp.rmq.adepts.builder;
 
 
-import com.coeuy.official.common.mq.common.MessageResult;
+import com.coeuy.osp.rmq.adepts.common.MessageResult;
 
 /**
  * 消息发送者接口

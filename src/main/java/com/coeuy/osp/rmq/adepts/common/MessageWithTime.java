@@ -1,4 +1,4 @@
-package com.coeuy.official.common.mq.common;
+package com.coeuy.osp.rmq.adepts.common;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

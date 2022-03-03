@@ -1,4 +1,4 @@
-package com.coeuy.official.common.mq.consumer;
+package com.coeuy.osp.rmq.adepts.consumer;
 
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.ConsumerCancelledException;

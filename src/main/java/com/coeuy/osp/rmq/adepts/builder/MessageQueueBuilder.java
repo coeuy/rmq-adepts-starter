@@ -1,10 +1,10 @@
-package com.coeuy.official.common.mq.builder;
+package com.coeuy.osp.rmq.adepts.builder;
 
-import com.coeuy.official.common.mq.common.Constants;
-import com.coeuy.official.common.mq.common.MessageResult;
-import com.coeuy.official.common.mq.common.MessageWithTime;
-import com.coeuy.official.common.mq.common.RetryCache;
-import com.coeuy.official.common.mq.consumer.MessageProcess;
+import com.coeuy.osp.rmq.adepts.common.Constants;
+import com.coeuy.osp.rmq.adepts.common.MessageResult;
+import com.coeuy.osp.rmq.adepts.common.MessageWithTime;
+import com.coeuy.osp.rmq.adepts.common.RetryCache;
+import com.coeuy.osp.rmq.adepts.consumer.MessageProcess;
 import com.google.common.collect.Sets;
 import com.rabbitmq.client.*;
 import lombok.extern.slf4j.Slf4j;

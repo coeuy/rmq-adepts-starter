@@ -1,7 +1,7 @@
-package com.coeuy.official.common.mq.common;
+package com.coeuy.osp.rmq.adepts.common;
 
-import com.coeuy.official.common.mq.builder.MessageQueueBuilder;
-import com.coeuy.official.common.mq.consumer.MessageProcess;
+import com.coeuy.osp.rmq.adepts.builder.MessageQueueBuilder;
+import com.coeuy.osp.rmq.adepts.consumer.MessageProcess;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;

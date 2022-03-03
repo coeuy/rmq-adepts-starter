@@ -1,7 +1,7 @@
-package com.coeuy.official.common.mq.consumer;
+package com.coeuy.osp.rmq.adepts.consumer;
 
 
-import com.coeuy.official.common.mq.common.MessageResult;
+import com.coeuy.osp.rmq.adepts.common.MessageResult;
 
 /**
  * <p> 消息处理接口 </p>

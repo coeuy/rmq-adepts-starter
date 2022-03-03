@@ -33,7 +33,7 @@
 spring: 
   rabbitmq:
     # rabbitmq服务地址 集群用‘,’隔开
-    address: ip:port
+    addresses: ip:port
     # rabbit用户名 分环境使用 (zhiantech_dev,zhiantech_test,zhiantech_stage)
     username: test
     # rabbit密码
@@ -91,9 +91,11 @@ public class UserService {
 @Component
 public class HelloMessageProcess implements MessageProcess<String> {
 
-    // 1. 导入监听初始化类
+    /**
+     *  1. 导入监听初始化类
+     */
     @Resource
-    InitListener initListener;
+    private InitListener initListener;
 
     /**
      * 2. 启动时初始化监听

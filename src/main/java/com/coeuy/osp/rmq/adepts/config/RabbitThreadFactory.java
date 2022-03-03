@@ -1,4 +1,4 @@
-package com.coeuy.official.common.mq.config;
+package com.coeuy.osp.rmq.adepts.config;
 
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicLong;

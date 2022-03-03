@@ -1,7 +1,7 @@
-package com.coeuy.official.common.mq.common;
+package com.coeuy.osp.rmq.adepts.common;
 
-import com.coeuy.official.common.mq.builder.MessageSender;
-import com.coeuy.official.common.mq.config.RabbitThreadFactory;
+import com.coeuy.osp.rmq.adepts.builder.MessageSender;
+import com.coeuy.osp.rmq.adepts.config.RabbitThreadFactory;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Map;

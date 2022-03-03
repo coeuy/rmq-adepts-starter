@@ -1,7 +1,7 @@
-package com.coeuy.official.common.mq.config;
+package com.coeuy.osp.rmq.adepts.config;
 
-import com.coeuy.official.common.mq.builder.MessageQueueBuilder;
-import com.coeuy.official.common.mq.producer.MessageProducer;
+import com.coeuy.osp.rmq.adepts.builder.MessageQueueBuilder;
+import com.coeuy.osp.rmq.adepts.producer.MessageProducer;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
@@ -24,17 +24,16 @@ import javax.annotation.Resource;
  */
 @Slf4j
 @Configuration
-@ComponentScan(basePackages = {"com.coeuy.official"})
+@ComponentScan(basePackages = {"com.coeuy.osp.rmq"})
 public class RabbitConfiguration {
 
 
     public RabbitConfiguration() {
-        log.info("                                          __                            __                       \n" +
-                " /|/|                                    /  |                         |/  |      /    |          \n" +
-                "( / | ___  ___  ___  ___  ___  ___      (   |      ___       ___      |___| ___    ___| ___  ___ \n" +
-                "|   )|___)|___ |___ |   )|   )|___)     |  \\)|   )|   )|   )|___)     |   )|   )| |   )|   )|___)\n" +
-                "|  / |__   __/  __/ |__/||__/ |__       |__/\\|__/ |__/||__/ |__       |__/ |    | |__/ |__/ |__  \n" +
-                "                         __/                                                           __/       ");
+        System.out.println(
+                "┬─┐┌┬┐┌─┐   ┌─┐┌┬┐┌─┐┌─┐┌┬┐┌─┐\n" +
+                "├┬┘││││─┼┐  ├─┤ ││├┤ ├─┘ │ └─┐\n" +
+                "┴└─┴ ┴└─┘└  ┴ ┴─┴┘└─┘┴   ┴ └─┘\n" +
+                "\n");
     }
 
     @Resource
@@ -89,9 +88,10 @@ public class RabbitConfiguration {
             }
         });
         // 失败回调
-        rabbitTemplate.setReturnCallback((message, replyCode, replyText, tmpExchange, tmpRoutingKey) -> {
-            log.warn("\n消息发送失败: [{}] [{}] [{}] [{}]", replyCode, replyText, tmpExchange, tmpRoutingKey);
-            log.warn("\n消息从交换机路由到队列失败: \n路由: [{}], \n路由关系: [{}],\n 回调代码: [{}], \n回调信息: [{}], \n消息内容: [{}]", tmpExchange, tmpRoutingKey, replyCode, replyText, message);
+        rabbitTemplate.setReturnsCallback((returned)->{
+            log.warn("\n消息发送失败: [{}] [{}] [{}] [{}]", returned.getReplyCode(), returned.getReplyText(), returned.getExchange(), returned.getRoutingKey());
+            log.warn("\n消息从交换机路由到队列失败: \n路由: [{}], \n路由关系: [{}],\n 回调代码: [{}], \n回调信息: [{}], \n消息内容: [{}]", returned.getExchange(), returned.getRoutingKey(), returned.getReplyCode(), returned.getReplyText(), returned.getMessage());
+
         });
         return rabbitTemplate;
     }
@@ -108,7 +108,7 @@ public class RabbitConfiguration {
     @Primary
     protected ConnectionFactory getConnectionFactory() {
         CachingConnectionFactory connectionFactory = new CachingConnectionFactory();
-        log.info("create connect {}", rabbitProperties.getAddresses());
+        log.info("Load mq properties {}", rabbitProperties.getAddresses());
         connectionFactory.setAddresses(rabbitProperties.getAddresses());
         connectionFactory.setUsername(rabbitProperties.getUsername());
         connectionFactory.setPassword(rabbitProperties.getPassword());
