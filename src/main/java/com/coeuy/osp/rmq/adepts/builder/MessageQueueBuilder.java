@@ -57,7 +57,7 @@ public class MessageQueueBuilder {
      * @param routingKey   绑定
      * @return {MessageSender}
      */
-    public MessageSender buildMessageSender(final String exchange, final String queue, final String exchangeType, final String toExchange, final String routingKey) {
+    public MessageSender buildMessageSender(final String exchange, final String queue, final String exchangeType, final String toExchange, final String routingKey,boolean tx,boolean retry) {
         // 创建重试缓存
         RetryCache retryCache = new RetryCache();
         // 构造sender对象
@@ -73,6 +73,7 @@ public class MessageQueueBuilder {
                 // 创建Template并设置参数
                 rabbitTemplate.setExchange(exchange);
                 rabbitTemplate.setRoutingKey(routingKey);
+                rabbitTemplate.setChannelTransacted(tx);
                 // 绑定普通队列
                 declareBindExchange(exchange, queue, exchangeType, toExchange, routingKey, false);
                 long id = retryCache.generateId();
@@ -85,11 +86,13 @@ public class MessageQueueBuilder {
                     log.error("应用关闭 消息发送失败：{} \n", e.getMessage());
                     return new MessageResult(false, "消息发送失败");
                 } catch (Exception e) {
-                    log.error("消息发送失败：{}\n", e.getMessage());
-                    // 加入重试
-                    retryCache.setSender(this);
-                    retryCache.add(messageWithTime);
-                    e.printStackTrace();
+                    log.error("消息发送失败", e);
+                    if (retry){
+                        // 加入重试
+                        retryCache.setSender(this);
+                        retryCache.add(messageWithTime);
+                    }
+
                     return new MessageResult(false, "消息发送失败");
                 }
             }
@@ -97,11 +100,11 @@ public class MessageQueueBuilder {
             @Override
             public MessageResult sendDelayMessage(Object message, int millisecond) {
                 long time = System.currentTimeMillis();
-                return sendDelayMessage(time, message, millisecond);
+                return sendDelayMessage(time, message, millisecond,false,false);
             }
 
             @Override
-            public MessageResult sendDelayMessage(long time, Object messageObject, int millisecond) {
+            public MessageResult sendDelayMessage(long time, Object messageObject, int millisecond,boolean tx,boolean retry) {
                 // 绑定延时队列
                 declareBindExchange(exchange, queue + Constants.DEFAULT_QUEUE_DELAY_SUFFIX, exchangeType, toExchange, routingKey + Constants.DEFAULT_QUEUE_DELAY_SUFFIX, true);
                 // 绑定死信队列
@@ -123,10 +126,12 @@ public class MessageQueueBuilder {
                         return message;
                     }, correlationData);
                 } catch (Exception e) {
-                    log.error("延时消息发送失败:{}\n", e.getMessage());
-                    retryCache.setSender(this);
-                    retryCache.add(messageWithTime);
-                    e.printStackTrace();
+                    log.error("延时消息发送失败", e);
+                    if (retry){
+                        // 加入重试
+                        retryCache.setSender(this);
+                        retryCache.add(messageWithTime);
+                    }
                     return new MessageResult(false, "消息发送失败");
                 }
                 return new MessageResult(true, "消息发送成功");
@@ -146,7 +151,7 @@ public class MessageQueueBuilder {
      * @return {<Message>MessageConsumer}
      */
     public <T> MessageConsumer buildMessageConsumer(final String exchange, final String queue, final String exchangeType, final String toExchange, final String routingKey, boolean delayed, final MessageProcess<T> messageProcess) {
-        log.info("\nbuildMessageConsumer");
+        log.info("\n创建消费实例");
         final Connection connection = connectionFactory.createConnection();
         String queueName;
         if (delayed) {
@@ -186,7 +191,6 @@ public class MessageQueueBuilder {
                     Message message = new Message(response.getBody(),
                             messagePropertiesConverter.toMessageProperties(response.getProps(), response.getEnvelope(), "UTF-8")
                     );
-
                     MessageResult messageResult;
                     try {
                         // 2 将原始数据转换为特定类型的包
@@ -213,12 +217,10 @@ public class MessageQueueBuilder {
                     }
                     return messageResult;
                 } catch (Exception e) {
-                    e.printStackTrace();
                     log.info("消费异常 Exception:\n ", e);
                     try {
                         channel.close();
                     } catch (IOException | TimeoutException ex) {
-                        ex.printStackTrace();
                         return new MessageResult(false, "关闭或取消异常\n" + e);
                     }
                     return new MessageResult(false, "exception:\n" + e);
@@ -334,8 +336,7 @@ public class MessageQueueBuilder {
             if (isDelay) {
                 log.warn("使用了延时队列");
             }
-            log.error("\n\n交换机 [{}] 类型 [{}] 创建失败 \n:{}\n", exchange.getName(), exchange.getType(), e.getCause());
-            e.printStackTrace();
+            log.error("\n\n交换机 [{}] 类型 [{}] 创建失败 \n:{}\n", exchange.getName(), exchange.getType(), e);
         }
     }
 }

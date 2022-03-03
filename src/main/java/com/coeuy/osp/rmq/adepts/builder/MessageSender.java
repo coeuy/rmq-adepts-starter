@@ -45,6 +45,6 @@ public interface MessageSender {
      * @param time        time
      * @return 消息发送结果
      */
-    MessageResult sendDelayMessage(long time, Object message, final int millisecond);
+    MessageResult sendDelayMessage(long time, Object message, final int millisecond,boolean tx,boolean retry);
 
 }

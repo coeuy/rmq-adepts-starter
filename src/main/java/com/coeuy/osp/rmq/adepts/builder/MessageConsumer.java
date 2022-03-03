@@ -16,4 +16,6 @@ public interface MessageConsumer {
      * @return 消息消费结果
      */
     MessageResult consume();
+
+
 }

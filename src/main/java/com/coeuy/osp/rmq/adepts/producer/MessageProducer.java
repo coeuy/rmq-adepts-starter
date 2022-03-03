@@ -19,12 +19,45 @@ public class MessageProducer {
     }
 
     public MessageResult sendMessage(String exchange, String queue, String type, String deadExchange, String routingKey, Object message) {
-        MessageSender messageSender = messageAccessBuilder.buildMessageSender(exchange, queue, type, deadExchange, routingKey);
+        MessageSender messageSender = messageAccessBuilder.buildMessageSender(exchange, queue, type, deadExchange, routingKey,false,false);
         return messageSender.send(message);
     }
 
     public MessageResult sendDelayMessage(String exchange, String queue, String type, String deadExchange, String routingKey, Object message, final int millisecond) {
-        MessageSender messageSender = messageAccessBuilder.buildMessageSender(exchange, queue, type, deadExchange, routingKey);
+        MessageSender messageSender = messageAccessBuilder.buildMessageSender(exchange, queue, type, deadExchange, routingKey,false,false);
+        return messageSender.sendDelayMessage(message, millisecond);
+    }
+
+
+    public MessageResult sendTxMessage(String exchange, String queue, String type, String deadExchange, String routingKey, Object message) {
+        MessageSender messageSender = messageAccessBuilder.buildMessageSender(exchange, queue, type, deadExchange, routingKey,true,false);
+        return messageSender.send(message);
+    }
+
+    public MessageResult sendTxDelayMessage(String exchange, String queue, String type, String deadExchange, String routingKey, Object message, final int millisecond) {
+        MessageSender messageSender = messageAccessBuilder.buildMessageSender(exchange, queue, type, deadExchange, routingKey,true,false);
+        return messageSender.sendDelayMessage(message, millisecond);
+    }
+
+
+    public MessageResult sendRetryMessage(String exchange, String queue, String type, String deadExchange, String routingKey, Object message) {
+        MessageSender messageSender = messageAccessBuilder.buildMessageSender(exchange, queue, type, deadExchange, routingKey,false,true);
+        return messageSender.send(message);
+    }
+
+    public MessageResult sendRetryDelayMessage(String exchange, String queue, String type, String deadExchange, String routingKey, Object message, final int millisecond) {
+        MessageSender messageSender = messageAccessBuilder.buildMessageSender(exchange, queue, type, deadExchange, routingKey,false,true);
+        return messageSender.sendDelayMessage(message, millisecond);
+    }
+
+
+    public MessageResult sendRetryTxMessage(String exchange, String queue, String type, String deadExchange, String routingKey, Object message) {
+        MessageSender messageSender = messageAccessBuilder.buildMessageSender(exchange, queue, type, deadExchange, routingKey,true,true);
+        return messageSender.send(message);
+    }
+
+    public MessageResult sendRetryTxDelayMessage(String exchange, String queue, String type, String deadExchange, String routingKey, Object message, final int millisecond) {
+        MessageSender messageSender = messageAccessBuilder.buildMessageSender(exchange, queue, type, deadExchange, routingKey,true,true);
         return messageSender.sendDelayMessage(message, millisecond);
     }
 

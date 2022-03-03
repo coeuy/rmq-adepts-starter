@@ -3,7 +3,6 @@ package com.coeuy.osp.rmq.adepts.common;
 import com.coeuy.osp.rmq.adepts.builder.MessageConsumer;
 import com.coeuy.osp.rmq.adepts.config.RabbitThreadFactory;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
 
 import java.util.concurrent.*;
 
@@ -41,9 +40,10 @@ public class ThreadPoolConsumer<T> {
         // 构造messageConsumer
         log.info("开始执行监听 线程数[{}] 队列[{}] ", infoHolder.getThreadCount(), infoHolder.getQueue());
         for (int i = 0; i < infoHolder.getThreadCount(); i++) {
-            log.info("开始执行第{}条线程", i + 1);
-            try{
+            try {
+                int finalI = i;
                 this.executor.execute(() -> {
+                    log.info("第{}条线程开始执行消费任务", finalI + 1);
                     MessageConsumer messageConsumer = infoHolder.getMessageBrokerBuilder().buildMessageConsumer(
                             infoHolder.getExchange(),
                             infoHolder.getQueue(),
@@ -61,7 +61,6 @@ public class ThreadPoolConsumer<T> {
                                 try {
                                     Thread.sleep(infoHolder.getIntervalMils());
                                 } catch (InterruptedException e) {
-                                    e.printStackTrace();
                                     log.error("interrupt ", e);
                                 }
                             }
@@ -73,13 +72,13 @@ public class ThreadPoolConsumer<T> {
                                 log.warn("消费失败: 回执消息[{}] ", messageResult.getMessage());
                             }
                         } catch (Exception e) {
-                            e.printStackTrace();
                             log.error("消费异常： ", e);
                         }
                     }
+
                 });
-            }catch (Exception e){
-                log.info("调度任务执行失败",e);
+            } catch (Exception e) {
+                log.info("调度任务执行失败", e);
                 shutdown();
             }
 
@@ -88,22 +87,20 @@ public class ThreadPoolConsumer<T> {
     }
 
     public void stop() {
-        log.info("MessageConsumer to Shutdown ···");
-        this.stop = !stop;
+        this.stop = true;
         try {
             Thread.sleep(Constants.ONE_SECOND);
             shutdown();
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            log.info("休眠失败", e);
         }
     }
 
     private void shutdown() {
         if (!executor.isShutdown()) {
-            log.info("消费任务线程关闭");
             executor.shutdown();
         }
-
+        log.info("Shutdown rmq adepts");
     }
 
     @Override

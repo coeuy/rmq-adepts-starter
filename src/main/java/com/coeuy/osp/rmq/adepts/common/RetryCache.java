@@ -87,7 +87,6 @@ public class RetryCache {
                     .addShutdownHook(new Thread(this::stop));
         });
     }
-
     public void stop() {
         log.info("Retry close ···");
         this.stop = true;

@@ -68,6 +68,7 @@ public class RabbitConfiguration {
         rabbitTemplate.setMessageConverter(jackson2JsonMessageConverter());
         // 走完整个流程 防止消息丢失
         rabbitTemplate.setMandatory(true);
+        rabbitTemplate.setChannelTransacted(true);
         // 设置发送确认
         rabbitTemplate.setConfirmCallback((correlationData, ack, cause) -> {
             assert correlationData != null;
