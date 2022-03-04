@@ -148,7 +148,6 @@ public class MessageQueueBuilder {
      * @return {<Message>MessageConsumer}
      */
     public <T> MessageConsumer buildMessageConsumer(final String exchange, final String queue, final ExchangeType exchangeType, final String toExchange, final String routingKey, boolean delayed, final MessageProcess<T> messageProcess) {
-        log.info("\n创建消费实例");
         final Connection connection = connectionFactory.createConnection();
         String queueName;
         if (delayed) {
