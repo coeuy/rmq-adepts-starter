@@ -8,8 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
-import java.util.concurrent.ExecutorService;
+import static org.springframework.amqp.core.ExchangeTypes.DIRECT;
 
 /**
  * <p> 初始化监听 </p>
@@ -37,10 +36,10 @@ public class InitListener {
      */
     @Async
     @SneakyThrows
-    public <T> void init(String exchange, String type, String queue, String routingKey, int threadCount, int intervalMils, boolean delayed, MessageProcess<T> messageProcess) {
+    public <T> void init(String exchange, ExchangeType type, String queue, String routingKey, int threadCount, int intervalMils, boolean delayed, MessageProcess<T> messageProcess) {
         // 开启监听
         ThreadPoolConsumerBuilder<T> process = new ThreadPoolConsumerBuilder<T>()
-                .setThreadCount(threadCount)
+                .setCoreSize(threadCount)
                 .setIntervalMils(intervalMils)
                 .setExchange(exchange)
                 .setRoutingKey(routingKey)
@@ -57,15 +56,49 @@ public class InitListener {
     @SneakyThrows
     public <T> void init(String exchange, String queue, String routingKey, MessageProcess<T> messageProcess, int threadCount) {
         // 使用 [默认线程参数]
-        init(exchange, Constants.DEFAULT_EXCHANGE_TYPE, queue, routingKey, threadCount, Constants.DEFAULT_INTERVAL_MILS, false, messageProcess);
+        init(exchange, ExchangeType.DIRECT, queue, routingKey, threadCount, Constants.DEFAULT_INTERVAL_MILS, false, messageProcess);
     }
 
     @SneakyThrows
     public <T> void init(String queue, MessageProcess<T> messageProcess, int threadCount,int interval) {
         // 使用 [默认线程参数]
-        init(Constants.DEFAULT_EXCHANGE_NAME, Constants.DEFAULT_EXCHANGE_TYPE, queue, Constants.DEFAULT_EXCHANGE_NAME+queue, threadCount,interval, false, messageProcess);
+        init(Constants.DEFAULT_EXCHANGE_NAME, ExchangeType.DIRECT, queue, Constants.DEFAULT_EXCHANGE_NAME+queue, threadCount,interval, false, messageProcess);
     }
 
+
+    @SneakyThrows
+    public <T> void initPool(String queue, MessageProcess<T> messageProcess, int core,int max) {
+        // 开启监听
+       initPool(Constants.DEFAULT_EXCHANGE_NAME,ExchangeType.DIRECT,queue,Constants.DEFAULT_EXCHANGE_NAME+queue,messageProcess,core,max,Constants.DEFAULT_INTERVAL_MILS);
+    }
+    
+    @SneakyThrows
+    public <T> void initPool(String exchange ,ExchangeType exchangeType,String queue,String rk, MessageProcess<T> messageProcess, int core,int max,int interval) {
+        // 开启监听
+        ThreadPoolConsumerBuilder<T> process = new ThreadPoolConsumerBuilder<T>()
+                .setCoreSize(core)
+                .setIntervalMils(interval)
+                .setExchange(exchange)
+                .setMaxSize(max)
+                .setRoutingKey(rk)
+                .setQueue(queue)
+                .setType(exchangeType)
+                .setDelayed(false)
+                .setMessageBrokerBuilder(messageBrokerBuilder)
+                .setMessageProcess(messageProcess);
+        ThreadPoolConsumer<T> build = process.build();
+        System.out.println("构建消费线程池"+build.toString());
+        build.start();
+    }
+    
+    @SneakyThrows
+    public <T> void initPool(String queue, MessageProcess<T> messageProcess, int core,int max,int interval) {
+        // 开启监听
+        
+       initPool(Constants.DEFAULT_EXCHANGE_NAME,ExchangeType.DIRECT,queue,Constants.DEFAULT_EXCHANGE_NAME+queue,messageProcess,core,max,interval);
+    }
+    
+    
     @SneakyThrows
     public <T> void init(String exchange, String queue, MessageProcess<T> messageProcess) {
         // 使用  [默认线程参数]  [默认RoutingKey=queue]  [默认路由类型]
@@ -93,7 +126,7 @@ public class InitListener {
     @SneakyThrows
     public <T> void initDelay(String exchange, String queue, String routingKey, boolean delayed, MessageProcess<T> messageProcess, int threadCount) {
         // 使用 [默认线程参数]
-        init(exchange, Constants.DEFAULT_EXCHANGE_TYPE, queue, routingKey, threadCount, Constants.DEFAULT_INTERVAL_MILS, delayed, messageProcess);
+        init(exchange, ExchangeType.DIRECT, queue, routingKey, threadCount, Constants.DEFAULT_INTERVAL_MILS, delayed, messageProcess);
     }
 
     @SneakyThrows

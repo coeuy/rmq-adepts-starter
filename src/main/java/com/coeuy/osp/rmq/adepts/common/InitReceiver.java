@@ -21,7 +21,7 @@ public class InitReceiver {
     @Resource
     private MessageQueueBuilder messageBrokerBuilder;
 
-    public <T> MessageResult initAndConsume(final String exchange, final String queue, final String exchangeType, final String deadExchange, final String routingKey, boolean delayed, final MessageProcess<T> messageProcess) {
+    public <T> MessageResult initAndConsume(final String exchange, final String queue, final ExchangeType exchangeType, final String deadExchange, final String routingKey, boolean delayed, final MessageProcess<T> messageProcess) {
         MessageConsumer messageConsumer = messageBrokerBuilder.buildMessageConsumer(exchange, queue, exchangeType, deadExchange, routingKey, delayed, messageProcess);
         return messageConsumer.consume();
     }

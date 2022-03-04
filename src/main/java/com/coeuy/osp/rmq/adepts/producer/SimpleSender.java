@@ -1,6 +1,7 @@
 package com.coeuy.osp.rmq.adepts.producer;
 
 import com.coeuy.osp.rmq.adepts.common.Constants;
+import com.coeuy.osp.rmq.adepts.common.ExchangeType;
 import com.coeuy.osp.rmq.adepts.common.MessageResult;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -22,11 +23,11 @@ public class SimpleSender {
         SimpleSender.messageProducer = messageProducer;
     }
 
-    public static MessageResult sendMessage(String exchange, String queue, String type, String deadExchange, String routingKey, Object message) {
+    public static MessageResult sendMessage(String exchange, String queue, ExchangeType type, String deadExchange, String routingKey, Object message) {
         return messageProducer.sendMessage(exchange, queue, type, deadExchange, routingKey, message);
     }
 
-    public static MessageResult sendDelayMessage(String exchange, String queue, String type, String deadExchange, String routingKey, Object message, final int millisecond) {
+    public static MessageResult sendDelayMessage(String exchange, String queue, ExchangeType type, String deadExchange, String routingKey, Object message, final int millisecond) {
         return messageProducer.sendDelayMessage(exchange, queue, type, deadExchange, routingKey, message, millisecond);
     }
 
@@ -41,12 +42,11 @@ public class SimpleSender {
         // 使用默认路由
         String exchange = Constants.DEFAULT_EXCHANGE_NAME;
         // 使用默认路由类型
-        String type = Constants.DEFAULT_EXCHANGE_TYPE;
         // 默认死信路由
         String deadExchange = Constants.DEFAULT_DEAD_LETTER_EXCHANGE;
         // 默认标识组成
 
-        return sendMessage(exchange, queue, type, deadExchange, exchange + queue, message);
+        return sendMessage(exchange, queue, ExchangeType.DIRECT, deadExchange, exchange + queue, message);
     }
 
     /**
@@ -59,12 +59,11 @@ public class SimpleSender {
      */
     public static MessageResult sendMessage(String exchange, String queue, Object message) {
         // 使用默认路由类型
-        String type = Constants.DEFAULT_EXCHANGE_TYPE;
         // 默认死信路由
         String deadExchange = Constants.DEFAULT_DEAD_LETTER_EXCHANGE;
         // 默认标识组成
         String routingKey = exchange + queue;
-        return sendMessage(exchange, queue, type, deadExchange, routingKey, message);
+        return sendMessage(exchange, queue, ExchangeType.DIRECT, deadExchange, routingKey, message);
     }
 
     /**
@@ -77,10 +76,9 @@ public class SimpleSender {
      */
     public static MessageResult sendMessage(String exchange, String queue, String routingKey, Object message) {
         // 使用默认路由类型
-        String type = Constants.DEFAULT_EXCHANGE_TYPE;
         // 默认死信路由
         String deadExchange = Constants.DEFAULT_DEAD_LETTER_EXCHANGE;
-        return sendMessage(exchange, queue, type, deadExchange, routingKey, message);
+        return sendMessage(exchange, queue, ExchangeType.DIRECT, deadExchange, routingKey, message);
     }
 
     /**
@@ -91,7 +89,7 @@ public class SimpleSender {
      * @param message 消息
      * @return 发送执行结果
      */
-    public static MessageResult sendMessageWithExchangeType(String queue, String type, Object message) {
+    public static MessageResult sendMessageWithExchangeType(String queue, ExchangeType type, Object message) {
         // 使用默认路由
         String exchange = Constants.DEFAULT_EXCHANGE_NAME;
         // 默认死信路由
@@ -108,7 +106,7 @@ public class SimpleSender {
      * @param message  消息
      * @return 发送执行结果
      */
-    public static MessageResult sendMessageWithExchangeType(String exchange, String queue, String type, Object message) {
+    public static MessageResult sendMessageWithExchangeType(String exchange, String queue, ExchangeType type, Object message) {
         // 默认死信路由
         String deadExchange = Constants.DEFAULT_DEAD_LETTER_EXCHANGE;
         // 默认标识组成
@@ -127,12 +125,11 @@ public class SimpleSender {
      */
     public static MessageResult sendDelayMessage(String exchange, String queue, Object message, final int millisecond) {
         // 使用默认路由类型
-        String type = Constants.DEFAULT_EXCHANGE_TYPE;
         // 默认死信路由
         String deadExchange = Constants.DEFAULT_DEAD_LETTER_EXCHANGE;
         // 默认标识组成
         String routingKey = exchange + queue;
-        return sendDelayMessage(exchange, queue, type, deadExchange, routingKey, message, millisecond);
+        return sendDelayMessage(exchange, queue, ExchangeType.DIRECT, deadExchange, routingKey, message, millisecond);
     }
 
     /**

@@ -14,18 +14,23 @@ import lombok.extern.slf4j.Slf4j;
 @Getter
 public class ThreadPoolConsumerBuilder<T> {
 
-    private int threadCount;
+    private int coreSize;
+    private int maxSize;
     private long intervalMils;
     private boolean delayed;
     private MessageQueueBuilder messageBrokerBuilder;
     private String exchange;
     private String routingKey;
     private String queue;
-    private String type;
+    private ExchangeType type;
     private MessageProcess<T> messageProcess;
 
-    public ThreadPoolConsumerBuilder<T> setThreadCount(int threadCount) {
-        this.threadCount = threadCount;
+    public ThreadPoolConsumerBuilder<T> setCoreSize(int coreSize) {
+        this.coreSize = coreSize;
+        return this;
+    }
+    public ThreadPoolConsumerBuilder<T> setMaxSize(int maxSize) {
+        this.maxSize = maxSize;
         return this;
     }
 
@@ -59,7 +64,7 @@ public class ThreadPoolConsumerBuilder<T> {
         return this;
     }
 
-    public ThreadPoolConsumerBuilder<T> setType(String type) {
+    public ThreadPoolConsumerBuilder<T> setType(ExchangeType type) {
         this.type = type;
         return this;
     }
@@ -76,7 +81,7 @@ public class ThreadPoolConsumerBuilder<T> {
     @Override
     public String toString() {
         return "ThreadPoolConsumerBuilder{" +
-                "threadCount=" + threadCount +
+                "threadCount=" + coreSize +
                 ", intervalMils=" + intervalMils +
                 ", delayed=" + delayed +
                 ", messageBrokerBuilder=" + messageBrokerBuilder +

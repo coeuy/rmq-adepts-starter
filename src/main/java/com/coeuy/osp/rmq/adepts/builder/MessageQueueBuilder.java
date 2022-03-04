@@ -1,9 +1,6 @@
 package com.coeuy.osp.rmq.adepts.builder;
 
-import com.coeuy.osp.rmq.adepts.common.Constants;
-import com.coeuy.osp.rmq.adepts.common.MessageResult;
-import com.coeuy.osp.rmq.adepts.common.MessageWithTime;
-import com.coeuy.osp.rmq.adepts.common.RetryCache;
+import com.coeuy.osp.rmq.adepts.common.*;
 import com.coeuy.osp.rmq.adepts.consumer.MessageProcess;
 import com.google.common.collect.Sets;
 import com.rabbitmq.client.*;
@@ -57,7 +54,7 @@ public class MessageQueueBuilder {
      * @param routingKey   绑定
      * @return {MessageSender}
      */
-    public MessageSender buildMessageSender(final String exchange, final String queue, final String exchangeType, final String toExchange, final String routingKey,boolean tx,boolean retry) {
+    public MessageSender buildMessageSender(final String exchange, final String queue, final ExchangeType exchangeType, final String toExchange, final String routingKey,boolean tx,boolean retry) {
         // 创建重试缓存
         RetryCache retryCache = new RetryCache();
         // 构造sender对象
@@ -110,7 +107,7 @@ public class MessageQueueBuilder {
                 // 绑定死信队列
                 declareDeadLetterBindExchange(Constants.DEFAULT_DEAD_LETTER_EXCHANGE,
                         queue + Constants.DEFAULT_DEAD_LETTER_EXCHANGE_SUFFIX,
-                        exchangeType, toExchange, Constants.DEFAULT_DEAD_LETTER_EXCHANGE + queue + Constants.DEFAULT_DEAD_LETTER_EXCHANGE_SUFFIX, true);
+                        exchangeType.getName(), toExchange, Constants.DEFAULT_DEAD_LETTER_EXCHANGE + queue + Constants.DEFAULT_DEAD_LETTER_EXCHANGE_SUFFIX, true);
 
                 // 创建Template并设置参数
                 rabbitTemplate.setExchange(exchange);
@@ -150,7 +147,7 @@ public class MessageQueueBuilder {
      * @param <T>            消息对象
      * @return {<Message>MessageConsumer}
      */
-    public <T> MessageConsumer buildMessageConsumer(final String exchange, final String queue, final String exchangeType, final String toExchange, final String routingKey, boolean delayed, final MessageProcess<T> messageProcess) {
+    public <T> MessageConsumer buildMessageConsumer(final String exchange, final String queue, final ExchangeType exchangeType, final String toExchange, final String routingKey, boolean delayed, final MessageProcess<T> messageProcess) {
         log.info("\n创建消费实例");
         final Connection connection = connectionFactory.createConnection();
         String queueName;
@@ -161,7 +158,7 @@ public class MessageQueueBuilder {
             // 绑定死信队列
             declareDeadLetterBindExchange(Constants.DEFAULT_DEAD_LETTER_EXCHANGE,
                     queue + Constants.DEFAULT_DEAD_LETTER_EXCHANGE_SUFFIX,
-                    exchangeType, toExchange, Constants.DEFAULT_DEAD_LETTER_EXCHANGE + queue + Constants.DEFAULT_DEAD_LETTER_EXCHANGE_SUFFIX, true);
+                    exchangeType.getName(), toExchange, Constants.DEFAULT_DEAD_LETTER_EXCHANGE + queue + Constants.DEFAULT_DEAD_LETTER_EXCHANGE_SUFFIX, true);
         } else {
             queueName = queue;
             //1 创建连接和channel
@@ -254,7 +251,7 @@ public class MessageQueueBuilder {
      * @param toExchange 交换机绑定
      * @param routingKey 路由标识
      */
-    public synchronized void declareBindExchange(String exchange, String queue, String exchangeType, String toExchange, String routingKey, boolean delayed) {
+    public synchronized void declareBindExchange(String exchange, String queue, ExchangeType exchangeType, String toExchange, String routingKey, boolean delayed) {
         // 添加缓存防止重复绑定浪费资源
         if (!BIND_CACHE.contains(exchange + queue + exchangeType)) {
             log.info("开始绑定队列交换机 QUEUE:{} EXCHANGE:{} TYPE:{}", queue, exchange, exchangeType);
@@ -262,7 +259,7 @@ public class MessageQueueBuilder {
             map.put("x-dead-letter-exchange", toExchange);
             map.put("x-dead-letter-routing-key", routingKey);
             //绑定队列
-            bind(map, exchange, queue, exchangeType, routingKey, delayed);
+            bind(map, exchange, queue, exchangeType.getName(), routingKey, delayed);
             BIND_CACHE.add(exchange + queue + exchangeType);
         }
     }

@@ -23,8 +23,8 @@ public class ThreadPoolConsumer<T> {
         ThreadFactory threadFactory = RabbitThreadFactory.create("rmq-adepts-consumer-executor", true);
         this.infoHolder = threadPoolConsumerBuilder;
         this.executor = new ThreadPoolExecutor(
-                threadPoolConsumerBuilder.getThreadCount(),
-                threadPoolConsumerBuilder.getThreadCount() + 10,
+                threadPoolConsumerBuilder.getCoreSize(),
+                threadPoolConsumerBuilder.getCoreSize() + 10,
                 1000,
                 TimeUnit.MILLISECONDS,
                 new LinkedBlockingQueue<Runnable>(10),
@@ -38,8 +38,8 @@ public class ThreadPoolConsumer<T> {
      */
     public void start() {
         // 构造messageConsumer
-        log.info("开始执行监听 线程数[{}] 队列[{}] ", infoHolder.getThreadCount(), infoHolder.getQueue());
-        for (int i = 0; i < infoHolder.getThreadCount(); i++) {
+        log.info("开始执行监听 线程数[{}] 队列[{}] ", infoHolder.getCoreSize(), infoHolder.getQueue());
+        for (int i = 0; i < infoHolder.getCoreSize(); i++) {
             try {
                 int finalI = i;
                 this.executor.execute(() -> {
