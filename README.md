@@ -1,17 +1,15 @@
 # 使用说明 rmq-adepts-starter
 
-## 新特性
+## 特性
 
-1. 支持回调发送结果
-2. 支持缓存重试
+1. 支持自定义回调发送结果
+2. 支持自定义缓存重试
 3. 支持TOPIC消息
 4. 支持单个队列多线程消费（可自定线程数）
-5. 支持手动确认消费
-6. 多线程监听
-7. 优雅停机
-8. 延时队列（需要rabbitmq插件支持 ， 延时队列在 3.6 版本及以上支持 http://www.rabbitmq.com/community-plugins.html 下载
+5. 支持手动确认消费/发送确认
+6. 优雅停机
+7. 延时队列（需要rabbitmq插件支持 ， 延时队列在 3.6 版本及以上支持 http://www.rabbitmq.com/community-plugins.html 下载
    rabbitmq_delayed_message_exchange 插件）
-9. 消息发送工具类SmsListener支持直接调用静态方法
 
 ## 导入依赖
 
@@ -40,6 +38,13 @@ spring:
     password: 123456
     # 空间名称 分环境使用 (virtual_dev,virtual_test,...)
     virtual-host: virtual
+# rmq adeptes 配置
+rmq-adepts:
+  # mq channels 最大连接数 ，注意 init的时候
+  connection-limit: 2000 
+  # 打开可看一些关键日志
+  debug: true
+
 ```
 
 ## 简单使用
@@ -69,10 +74,7 @@ public class UserService {
 }
 ```
 
-> 注意： MessageProducer需要在Spring bean @Component 下才生效
-
-
-2.单例工具类调用方式
+2.工具类调用方式
 
 ```java
 public class UserService {
@@ -86,7 +88,6 @@ public class UserService {
 ### 订阅消息
 
 ```java
-
 @Slf4j
 @Component
 public class HelloMessageProcess implements MessageProcess<String> {
@@ -117,6 +118,43 @@ public class HelloMessageProcess implements MessageProcess<String> {
         // 4. 返回消息消费确认 
         return new MessageResult(true, "OK");
     }
+}
+
+```
+
+### 多线程消费(大批量无序异步处理场景)
+```java
+
+@Slf4j
+@Component
+public class HelloMessageProcess implements MessageProcess<String> {
+
+   /**
+    *  1. 导入监听初始化类
+    */
+   @Resource
+   private InitListener initListener;
+
+   /**
+    * 2. 启动时初始化多线程监听
+    */
+   @PostConstruct
+   public void init() {
+      // 2.1 初始化100条监听
+      initListener.init("hello", this,100);
+   }
+
+   /**
+    * 3. 接收消息进行业务操作
+    */
+   @Override
+   public MessageResult process(String message) {
+      log.info("快看！ 我收到消息了 {}", message);
+      System.out.println(message);
+
+      // 4. 返回消息消费确认 
+      return new MessageResult(true, "OK");
+   }
 }
 
 ```

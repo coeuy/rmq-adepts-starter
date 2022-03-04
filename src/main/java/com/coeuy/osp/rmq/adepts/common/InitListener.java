@@ -49,7 +49,6 @@ public class InitListener {
                 .setMessageBrokerBuilder(messageBrokerBuilder)
                 .setMessageProcess(messageProcess);
         ThreadPoolConsumer<T> build = process.build();
-        System.out.println("构建消费线程池"+build.toString());
         build.start();
     }
 
@@ -87,7 +86,6 @@ public class InitListener {
                 .setMessageBrokerBuilder(messageBrokerBuilder)
                 .setMessageProcess(messageProcess);
         ThreadPoolConsumer<T> build = process.build();
-        System.out.println("构建消费线程池"+build.toString());
         build.start();
     }
     
