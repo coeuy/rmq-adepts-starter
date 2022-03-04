@@ -11,19 +11,20 @@
 7. 延时队列（需要rabbitmq插件支持 ， 延时队列在 3.6 版本及以上支持 http://www.rabbitmq.com/community-plugins.html 下载
    rabbitmq_delayed_message_exchange 插件）
 
-## 导入依赖
+## 开始使用
 
+### 1. 依赖导入
 ```xml
 
 <dependency>
-    <groupId>com.coeuy</groupId>
-    <artifactId>rmq-adepts-starter</artifactId>
-    <version>last-version</version>
-    <scope>compile</scope>
+   <groupId>com.coeuy</groupId>
+   <artifactId>rmq-adepts-starter</artifactId>
+   <version>last-version</version>
+   <scope>compile</scope>
 </dependency>
 ```
 
-## 配置详情
+### 2. 配置详情
 
 基于 starter amqp
 
@@ -32,11 +33,11 @@ spring:
   rabbitmq:
     # rabbitmq服务地址 集群用‘,’隔开
     addresses: ip:port
-    # rabbit用户名 分环境使用 (zhiantech_dev,zhiantech_test,zhiantech_stage)
+    # rabbit用户名 
     username: test
     # rabbit密码
     password: 123456
-    # 空间名称 分环境使用 (virtual_dev,virtual_test,...)
+    # 空间名称 
     virtual-host: virtual
 # rmq adeptes 配置
 rmq-adepts:
@@ -47,9 +48,7 @@ rmq-adepts:
 
 ```
 
-## 简单使用
-
-### 发送消息
+### 3.发送消息
 
 > 消息的发送方只需要写以下代码，就可以实现消息的发送！ 发送更多类型请查看方法注释。
 
@@ -85,7 +84,7 @@ public class UserService {
 }
 ```
 
-### 订阅消息
+### 4. 订阅（消费）消息
 
 ```java
 @Slf4j
@@ -122,7 +121,7 @@ public class HelloMessageProcess implements MessageProcess<String> {
 
 ```
 
-### 多线程消费(大批量无序异步处理场景)
+### 5. 多线程消费(大批量无序异步处理场景)
 ```java
 
 @Slf4j
@@ -140,8 +139,8 @@ public class HelloMessageProcess implements MessageProcess<String> {
     */
    @PostConstruct
    public void init() {
-      // 2.1 初始化100条监听
-      initListener.init("hello", this,100);
+      // 2.1 初始化线程池最小5 最大100 的监听任务
+      initListener.init("hello", this, 5, 100);
    }
 
    /**
@@ -159,9 +158,12 @@ public class HelloMessageProcess implements MessageProcess<String> {
 
 ```
 
-#### 发送消息时 Object 类定义
+#### 注意事项：
+
+1. 发送消息时 Object 类定义
 
 > 发送Message Obj时 Bbj必须含有全参构造方法，否则Jackson序列化解析失败
   
-    
+2. connection-limit 必须大于 init的线程总数
+> connection-limit mq的最大连接数，使用多线程时要配置
 

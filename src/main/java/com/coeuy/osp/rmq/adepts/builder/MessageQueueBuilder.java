@@ -181,7 +181,6 @@ public class MessageQueueBuilder {
                             Thread.sleep(Constants.ONE_SECOND);
                         }
                     } catch (AmqpException e) {
-                        log.error("AmqpException : {}", e.getMessage());
                         return null;
                     }
                     Message message = new Message(response.getBody(),

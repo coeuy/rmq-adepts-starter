@@ -131,7 +131,7 @@ public class RabbitConfiguration {
             }
         }
         connectionFactory.setConnectionTimeout(rmqAdeptsProperties.getConnectionTimeout());
-        connectionFactory.setConnectionLimit(rmqAdeptsProperties.getConnectionLimit()<=0?1:rmqAdeptsProperties.getConnectionLimit());
+        connectionFactory.setConnectionLimit(rmqAdeptsProperties.getConnectionLimit());
         return connectionFactory;
     }
 }

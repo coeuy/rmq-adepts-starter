@@ -65,7 +65,6 @@ public class ThreadPoolConsumer<T> {
                                 }
                             }
                             if (messageResult == null) {
-                                log.warn("消息处理确认为空");
                                 break;
                             }
                             if (!messageResult.isSuccess()) {
