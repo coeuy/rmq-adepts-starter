@@ -8,10 +8,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
-import java.util.Objects;
-
-import static org.springframework.amqp.core.ExchangeTypes.DIRECT;
-
 /**
  * <p> 初始化监听 </p>
  *

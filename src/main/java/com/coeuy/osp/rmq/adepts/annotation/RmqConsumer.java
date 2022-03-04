@@ -2,7 +2,6 @@ package com.coeuy.osp.rmq.adepts.annotation;
 
 import com.coeuy.osp.rmq.adepts.common.Constants;
 import com.coeuy.osp.rmq.adepts.common.ExchangeType;
-import org.springframework.core.annotation.AliasFor;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Indexed;
 
