@@ -141,4 +141,6 @@ public class HelloMessageProcess implements MessageProcess<String> {
 > 发送Message Obj时 Bbj必须含有全参构造方法，否则Jackson序列化解析失败
 
 #### 常见问题
--
+
+1. 多线程怎么确保消息顺序？
+>答: 多线程消费不是为了顺序消费设计的，如果需要顺序不该考虑用多线程 
