@@ -90,64 +90,37 @@ public class UserService {
 ### 4. 订阅（消费）消息
 
 ```java
+import com.coeuy.osp.rmq.adepts.annotation.RmqConsumer;
+
 @Slf4j
-@Component
+@RmqConsumer(queue = "hello")
 public class HelloMessageProcess implements MessageProcess<String> {
-
-    /**
-     *  1. 导入监听初始化类
-     */
-    @Resource
-    private InitListener initListener;
-
-    /**
-     * 2. 启动时初始化监听
-     */
-    @PostConstruct
-    public void init() {
-        // 2.1 指定初始化参数（这里做了最简单的使用，更多参数自己点进去看）
-        initListener.init("hello", this);
-    }
-
-    /**
-     * 3. 接收消息进行业务操作
-     */
-    @Override
-    public MessageResult process(String message) {
-        log.info("快看！ 我收到消息了 {}", message);
-        System.out.println(message);
-
-        // 4. 返回消息消费确认 
-        return new MessageResult(true, "OK");
-    }
+   /**
+    *  接收消息进行业务操作
+    */
+   @Override
+   public MessageResult process(String message) {
+      log.info("快看！ 我收到消息了 {}", message);
+      System.out.println(message);
+      // 4. 返回消息消费确认 
+      return new MessageResult(true, "OK");
+   }
 }
 
 ```
 
 ### 5. 多线程消费(大批量无序异步处理场景)
+
 ```java
 
+import com.coeuy.osp.rmq.adepts.annotation.RmqConsumer;
+
 @Slf4j
-@Component
+@RmqConsumer(queue = "hello", core = 5, max=100)
 public class HelloMessageProcess implements MessageProcess<String> {
 
    /**
-    *  1. 导入监听初始化类
-    */
-   @Resource
-   private InitListener initListener;
-
-   /**
-    * 2. 启动时初始化多线程监听
-    */
-   @PostConstruct
-   public void init() {
-      // 2.1 初始化线程池最小5 最大100 的监听任务
-      initListener.init("hello", this, 5, 100);
-   }
-
-   /**
-    * 3. 接收消息进行业务操作
+    *  接收消息进行业务操作
     */
    @Override
    public MessageResult process(String message) {
