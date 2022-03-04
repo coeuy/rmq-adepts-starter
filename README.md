@@ -10,7 +10,9 @@
 6. 优雅停机
 7. 延时队列（需要rabbitmq插件支持 ， 延时队列在 3.6 版本及以上支持 http://www.rabbitmq.com/community-plugins.html 下载
    rabbitmq_delayed_message_exchange 插件）
+8. 注解声明消费
 
+#### [Springboot例子](https://github.com/yarnk/rmq-adepts-example) 
 ## 开始使用
 
 ### 1. 依赖导入
@@ -163,7 +165,6 @@ public class HelloMessageProcess implements MessageProcess<String> {
 1. 发送消息时 Object 类定义
 
 > 发送Message Obj时 Bbj必须含有全参构造方法，否则Jackson序列化解析失败
-  
-2. connection-limit 必须大于 init的线程总数
-> connection-limit mq的最大连接数，使用多线程时要配置
 
+#### 常见问题
+-

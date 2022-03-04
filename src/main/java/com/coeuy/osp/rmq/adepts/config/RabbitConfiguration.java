@@ -95,7 +95,6 @@ public class RabbitConfiguration {
         rabbitTemplate.setReturnsCallback((returned)->{
             log.warn("\n消息发送失败: [{}] [{}] [{}] [{}]", returned.getReplyCode(), returned.getReplyText(), returned.getExchange(), returned.getRoutingKey());
             log.warn("\n消息从交换机路由到队列失败: \n路由: [{}], \n路由关系: [{}],\n 回调代码: [{}], \n回调信息: [{}], \n消息内容: [{}]", returned.getExchange(), returned.getRoutingKey(), returned.getReplyCode(), returned.getReplyText(), returned.getMessage());
-
         });
         return rabbitTemplate;
     }
@@ -131,7 +130,10 @@ public class RabbitConfiguration {
             }
         }
         connectionFactory.setConnectionTimeout(rmqAdeptsProperties.getConnectionTimeout());
-        connectionFactory.setConnectionLimit(rmqAdeptsProperties.getConnectionLimit()<=0?1:rmqAdeptsProperties.getConnectionLimit());
+        if (rmqAdeptsProperties.getConnectionLimit()>0){
+            log.info("ConnectionLimit:{}",rmqAdeptsProperties.getConnectionLimit());
+            connectionFactory.setConnectionLimit(rmqAdeptsProperties.getConnectionLimit());
+        }
         return connectionFactory;
     }
 }

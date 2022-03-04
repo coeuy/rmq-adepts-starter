@@ -23,7 +23,7 @@ public class RmqAdeptsProperties {
      */
     private boolean debug = false;
 
-    private int connectionLimit = 1;
+    private int connectionLimit = 0;
 
     private int connectionTimeout = 0;
 
