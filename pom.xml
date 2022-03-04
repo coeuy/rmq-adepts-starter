@@ -5,7 +5,7 @@
     <groupId>com.coeuy</groupId>
     <artifactId>rmq-adepts-starter</artifactId>
     <name>rmq-adepts-starter</name>
-    <version>1.0.6</version>
+    <version>1.0.7</version>
     <description>RabbitMQ adepts for Springboot starter</description>
     <properties>
         <java.version>1.8</java.version>

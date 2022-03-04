@@ -1,0 +1,20 @@
+{"properties": [
+  {
+    "name": "rmq-adepts.debug",
+    "type": "java.lang.Boolean",
+    "defaultValue": false
+  },
+  {
+    "name": "rmq-adepts.connectionLimit",
+    "type": "java.lang.Integer",
+    "defaultValue": 1,
+    "description": "RabbitMQ连接工厂最大连接数."
+  },
+
+  {
+    "name": "rmq-adepts.connectionTimeout",
+    "type": "java.lang.Integer",
+    "defaultValue": 0,
+    "description": "RabbitMQ连接连接超时时间，默认 0 永不超时."
+  }
+]}

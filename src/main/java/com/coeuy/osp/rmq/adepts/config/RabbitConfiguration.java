@@ -15,6 +15,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 
 import javax.annotation.Resource;
+import java.util.Objects;
 
 /**
  * <p> MQ核心配置 </p>
@@ -38,6 +39,9 @@ public class RabbitConfiguration {
 
     @Resource
     private RabbitProperties rabbitProperties;
+
+    @Resource
+    private RmqAdeptsProperties rmqAdeptsProperties;
 
     @Bean
     public MessageQueueBuilder getMessageBrokerBuilder() {
@@ -108,15 +112,26 @@ public class RabbitConfiguration {
     @Primary
     protected ConnectionFactory getConnectionFactory() {
         CachingConnectionFactory connectionFactory = new CachingConnectionFactory();
-        log.info("Load mq properties {}", rabbitProperties.getAddresses());
+        if (rmqAdeptsProperties.isDebug()){
+            log.info("Load mq properties {}", rabbitProperties.getAddresses());
+            log.info("Load rmq properties {}", rmqAdeptsProperties);
+        }
         connectionFactory.setAddresses(rabbitProperties.getAddresses());
         connectionFactory.setUsername(rabbitProperties.getUsername());
         connectionFactory.setPassword(rabbitProperties.getPassword());
         connectionFactory.setVirtualHost(rabbitProperties.getVirtualHost());
         connectionFactory.setPublisherReturns(true);
-        connectionFactory.setCacheMode(CachingConnectionFactory.CacheMode.CONNECTION);
-        connectionFactory.setChannelCacheSize(200);
-        connectionFactory.setConnectionLimit(200);
+
+        if (Objects.nonNull(rabbitProperties.getCache())){
+            if(Objects.nonNull(rabbitProperties.getCache().getConnection())) {
+                connectionFactory.setCacheMode(rabbitProperties.getCache().getConnection().getMode());
+            }
+            if (Objects.nonNull(rabbitProperties.getCache().getChannel())&&Objects.nonNull(rabbitProperties.getCache().getChannel().getSize())) {
+                connectionFactory.setChannelCacheSize(rabbitProperties.getCache().getChannel().getSize());
+            }
+        }
+        connectionFactory.setConnectionTimeout(rmqAdeptsProperties.getConnectionTimeout());
+        connectionFactory.setConnectionLimit(rmqAdeptsProperties.getConnectionLimit()<=0?1:rmqAdeptsProperties.getConnectionLimit());
         return connectionFactory;
     }
 }

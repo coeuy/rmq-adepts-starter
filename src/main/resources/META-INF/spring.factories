@@ -1,2 +1,3 @@
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-  com.coeuy.osp.rmq.adepts.config.RabbitConfiguration
+  com.coeuy.osp.rmq.adepts.config.RabbitConfiguration,\
+  com.coeuy.osp.rmq.adepts.config.RmqAdeptsProperties
