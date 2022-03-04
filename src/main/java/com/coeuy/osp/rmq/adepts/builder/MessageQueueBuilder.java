@@ -3,7 +3,10 @@ package com.coeuy.osp.rmq.adepts.builder;
 import com.coeuy.osp.rmq.adepts.common.*;
 import com.coeuy.osp.rmq.adepts.consumer.MessageProcess;
 import com.google.common.collect.Sets;
-import com.rabbitmq.client.*;
+import com.rabbitmq.client.AMQP;
+import com.rabbitmq.client.BuiltinExchangeType;
+import com.rabbitmq.client.Channel;
+import com.rabbitmq.client.GetResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.AmqpApplicationContextClosedException;
 import org.springframework.amqp.AmqpException;
@@ -16,13 +19,11 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.rabbit.support.DefaultMessagePropertiesConverter;
 import org.springframework.amqp.rabbit.support.MessagePropertiesConverter;
 import org.springframework.amqp.support.converter.MessageConverter;
-import org.springframework.context.support.AbstractApplicationContext;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.TimeoutException;
 
 

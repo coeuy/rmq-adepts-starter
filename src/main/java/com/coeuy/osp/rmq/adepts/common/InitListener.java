@@ -8,6 +8,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+import java.util.Objects;
+
 import static org.springframework.amqp.core.ExchangeTypes.DIRECT;
 
 /**
@@ -30,7 +32,7 @@ public class InitListener {
      * @param queue          队列
      * @param routingKey     路由键
      * @param threadCount    线程数量
-     * @param intervalMils   执行时间间隔（）
+     * @param intervalMils   执行时间间隔（ms）
      * @param messageProcess 业务处理类
      * @param <T>            消息类型
      */
@@ -68,11 +70,30 @@ public class InitListener {
     @SneakyThrows
     public <T> void initPool(String queue, MessageProcess<T> messageProcess, int core,int max) {
         // 开启监听
-       initPool(Constants.DEFAULT_EXCHANGE_NAME,ExchangeType.DIRECT,queue,Constants.DEFAULT_EXCHANGE_NAME+queue,messageProcess,core,max,Constants.DEFAULT_INTERVAL_MILS);
+       initPool(Constants.DEFAULT_EXCHANGE_NAME,ExchangeType.DIRECT,queue,Constants.DEFAULT_EXCHANGE_NAME+queue,messageProcess,core,max,false,Constants.DEFAULT_INTERVAL_MILS);
     }
-    
+
     @SneakyThrows
-    public <T> void initPool(String exchange ,ExchangeType exchangeType,String queue,String rk, MessageProcess<T> messageProcess, int core,int max,int interval) {
+    public <T> void initDelay(String queue, MessageProcess<T> messageProcess, int core,int max) {
+        // 开启监听
+        initPool(Constants.DEFAULT_EXCHANGE_NAME,ExchangeType.DIRECT,queue,Constants.DEFAULT_EXCHANGE_NAME+queue,messageProcess,core,max,true,Constants.DEFAULT_INTERVAL_MILS);
+    }
+
+    /**
+     * 初始化监听
+     * @param exchange 交换机
+     * @param exchangeType 交换机类型
+     * @param queue 队列
+     * @param rk routingKey
+     * @param messageProcess 已被实现的消息处理器
+     * @param core 核心线程
+     * @param max 最大线程
+     * @param delayed 是否延时
+     * @param interval 消息处理时隔 (ms)
+     * @param <T> 消息类型
+     */
+    @SneakyThrows
+    public <T> void initPool(String exchange ,ExchangeType exchangeType,String queue,String rk, MessageProcess<T> messageProcess, int core,int max,boolean delayed,int interval) {
         // 开启监听
         ThreadPoolConsumerBuilder<T> process = new ThreadPoolConsumerBuilder<T>()
                 .setCoreSize(core)
@@ -82,7 +103,7 @@ public class InitListener {
                 .setRoutingKey(rk)
                 .setQueue(queue)
                 .setType(exchangeType)
-                .setDelayed(false)
+                .setDelayed(delayed)
                 .setMessageBrokerBuilder(messageBrokerBuilder)
                 .setMessageProcess(messageProcess);
         ThreadPoolConsumer<T> build = process.build();
@@ -92,8 +113,7 @@ public class InitListener {
     @SneakyThrows
     public <T> void initPool(String queue, MessageProcess<T> messageProcess, int core,int max,int interval) {
         // 开启监听
-        
-       initPool(Constants.DEFAULT_EXCHANGE_NAME,ExchangeType.DIRECT,queue,Constants.DEFAULT_EXCHANGE_NAME+queue,messageProcess,core,max,interval);
+       initPool(Constants.DEFAULT_EXCHANGE_NAME,ExchangeType.DIRECT,queue,Constants.DEFAULT_EXCHANGE_NAME+queue,messageProcess,core,max,false,interval);
     }
     
     
@@ -119,6 +139,14 @@ public class InitListener {
     public <T> void init(String queue, MessageProcess<T> messageProcess) {
         // 简单使用
         init(Constants.DEFAULT_EXCHANGE_NAME, queue, messageProcess);
+    }
+
+    @SneakyThrows
+    @SuppressWarnings("all")
+    public <T> void init(String exchange ,ExchangeType exchangeType,String queue,String rk, int core,int max,int interval,boolean delay,Object object) {
+        MessageProcess<T> messageProcess = (MessageProcess<T>) object;
+        // 简单使用
+        initPool(exchange,exchangeType,queue,rk,messageProcess,core,max,delay,interval);
     }
 
     @SneakyThrows
