@@ -20,7 +20,7 @@
 <dependency>
     <groupId>com.coeuy</groupId>
     <artifactId>rmq-adepts-starter</artifactId>
-    <version>1.0.0</version>
+    <version>last-version</version>
     <scope>compile</scope>
 </dependency>
 ```
