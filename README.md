@@ -29,7 +29,7 @@
 
 ### 2. 配置详情
 
-基于 starter amqp
+基于 starter amqp 
 
 ```yaml 
 spring: 
@@ -44,7 +44,7 @@ spring:
     virtual-host: virtual
 # rmq adeptes 配置
 rmq-adepts:
-  # mq channels 最大连接数 ，注意 init的时候
+  # mq channels 最大连接数 
   connection-limit: 2000 
   # 打开可看一些关键日志
   debug: true
