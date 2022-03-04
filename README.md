@@ -13,6 +13,7 @@
 8. 注解声明消费
 
 #### [Springboot例子](https://github.com/yarnk/rmq-adepts-example) 
+#### [交流社区](https://chat.coeuy.com) 
 ## 开始使用
 
 ### 1. 依赖导入
