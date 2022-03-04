@@ -22,10 +22,10 @@ public class RmqAdeptsProperties {
     /**
      * 是否开启debug模式
      */
-    private boolean debug;
+    private boolean debug = false;
 
-    private int connectionLimit;
+    private int connectionLimit = 1;
 
-    private int connectionTimeout;
+    private int connectionTimeout = 0;
 
 }
